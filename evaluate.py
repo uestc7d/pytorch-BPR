@@ -51,7 +51,7 @@ def eval_one_rating(idx):
     gtItem = rating[1]
     map_item_score = {}
     # Get the score of the test item first
-    maxScore = _model.predict(int(u), int(gtItem))
+    maxScore = _model.predict(u, gtItem)
     # Early stopping if there are K items larger than maxScore.
     countLarger = 0
     for i in xrange(_model.num_item):

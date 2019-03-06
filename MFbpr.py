@@ -77,9 +77,6 @@ class MFbpr(nn.Module):
                 self.sgd_step.zero_grad()
                 # forward propagation
                 y_ui, y_uj, loss = self.forward(users, items_pos, items_neg)
-                if s % 5000 == 1:
-                    print loss
-
                 # back propagation
                 loss.backward()
                 self.sgd_step.step()
@@ -90,16 +87,12 @@ class MFbpr(nn.Module):
             print("Iter=%d [%.1f s] HitRatio@%d = %.3f, NDCG@%d = %.3f [%.1f s]"
                   %(iteration, t2-t1, topK, np.array(hits).mean(), topK, np.array(ndcgs).mean(), time.time()-t2))
 
-            break
-
-
 
     def predict(self, u, i):
 #         print u, i
 #         print self.U[u], self.V[i]
 #         print np.inner(self.U[u].detach().numpy(), self.V[i].detach().numpy())
-
-        return np.dot(self.U[u].detach().numpy(), self.V[i].detach().numpy())
+        return np.inner(self.U[u].detach().numpy(), self.V[i].detach().numpy())
 
     def get_batch(self, batch_size):
         users, pos_items, neg_items = [], [], []
