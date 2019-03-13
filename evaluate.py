@@ -10,9 +10,6 @@ Evaluate the performance of Top-K recommendation:
 import math
 import heapq # for retrieval topK
 import multiprocessing
-from line_profiler import LineProfiler
-#from numba import jit, autojit
-
 
 # Global variables that are shared across processes
 _model = None
@@ -35,7 +32,7 @@ def evaluate_model(model, testRatings, K, num_thread):
     num_rating = len(testRatings)
 
     pool = multiprocessing.Pool(processes=num_thread)
-    res = pool.map(eval_one_rating, range(num_rating))
+    res = pool.map(eval_one_rating, xrange(num_rating))
     pool.close()
     pool.join()
 
@@ -50,11 +47,16 @@ def eval_one_rating(idx):
     u = rating[0]
     gtItem = rating[1]
     map_item_score = {}
+    
     # Get the score of the test item first
     maxScore = _model.predict(u, gtItem)
+    
     # Early stopping if there are K items larger than maxScore.
     countLarger = 0
-    for i in xrange(_model.num_item):
+    # _model.num_item is the number of all item. xrange(_model.num_item)
+    # _model.neg[u] is a list
+    for i in _model.neg[u]:
+    
         early_stop = False
         score = _model.predict(u, i)
         map_item_score[i] = score

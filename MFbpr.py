@@ -13,7 +13,7 @@ class MFbpr(nn.Module):
     '''
     BPR learning for MF model
     '''
-    def __init__(self, train, test, num_user, num_item, factors, learning_rate, reg, init_mean, init_stdev):
+    def __init__(self, train, test, num_user, num_item, neg, factors, learning_rate, reg, init_mean, init_stdev):
         '''
         Constructor
         '''
@@ -22,6 +22,7 @@ class MFbpr(nn.Module):
         self.test = test
         self.num_user = num_user
         self.num_item = num_item
+        self.neg = neg
         self.factors = factors
         self.learning_rate = learning_rate
         self.reg = reg
@@ -44,6 +45,7 @@ class MFbpr(nn.Module):
                 item = train[u][i][0]
                 self.items_of_user[u].add(item)
                 self.num_rating += 1
+
 
     def forward(self, u, i, j):
         '''
@@ -82,16 +84,14 @@ class MFbpr(nn.Module):
                 self.sgd_step.step()
             # check performance
             t2 = time.time()
-            topK = 100
+            topK = 20
             (hits, ndcgs) = evaluate_model(self, self.test, topK, num_thread)
-            print("Iter=%d [%.1f s] HitRatio@%d = %.3f, NDCG@%d = %.3f [%.1f s]"
-                  %(iteration, t2-t1, topK, np.array(hits).mean(), topK, np.array(ndcgs).mean(), time.time()-t2))
-
+            if iteration % 20 == 19:
+                print("Iter=%d [%.1f s] HitRatio@%d = %.4f, NDCG@%d = %.4f [%.1f s]"
+                      %(iteration, t2-t1, topK, np.array(hits).mean(), topK, np.array(ndcgs).mean(), time.time()-t2))
+            
 
     def predict(self, u, i):
-#         print u, i
-#         print self.U[u], self.V[i]
-#         print np.inner(self.U[u].detach().numpy(), self.V[i].detach().numpy())
         return np.inner(self.U[u].detach().numpy(), self.V[i].detach().numpy())
 
     def get_batch(self, batch_size):
