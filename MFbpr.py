@@ -35,6 +35,7 @@ class MFbpr(nn.Module):
 
         # optim
         self.sgd_step = optim.SGD([self.U, self.V], lr=self.learning_rate)
+        self.mf_sheduler = optim.lr_scheduler.StepLR(gamma=0.3, optimizer=self.sgd_step, step_size=1000)
 
         # Each element is the set of items for a user, used for negative sampling
         self.items_of_user = []
@@ -70,6 +71,7 @@ class MFbpr(nn.Module):
         print("Training MF-BPR with: learning_rate=%.2f, regularization=%.4f, factors=%d, #epoch=%d, batch_size=%d."
           %(self.learning_rate, self.reg, self.factors, maxIter, batch_size))
         for iteration in xrange(maxIter):
+            self.mf_sheduler.step()
             # Each training epoch
             t1 = time.time()
             for s in xrange(self.num_rating / batch_size):
@@ -83,10 +85,11 @@ class MFbpr(nn.Module):
                 loss.backward()
                 self.sgd_step.step()
             # check performance
-            t2 = time.time()
-            topK = 20
-            (hits, ndcgs) = evaluate_model(self, self.test, topK, num_thread)
             if iteration % 20 == 19:
+            	t2 = time.time()
+                topK = 20
+                (hits, ndcgs) = evaluate_model(self, self.test, topK, num_thread)
+
                 print("Iter=%d [%.1f s] HitRatio@%d = %.4f, NDCG@%d = %.4f [%.1f s]"
                       %(iteration, t2-t1, topK, np.array(hits).mean(), topK, np.array(ndcgs).mean(), time.time()-t2))
             

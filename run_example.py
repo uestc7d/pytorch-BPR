@@ -17,7 +17,7 @@ if __name__ == '__main__':
     reg = 0.01
     init_mean = 0
     init_stdev = 0.01
-    maxIter = 3000
+    maxIter = 10000
     batch_size = 32
     num_thread = mp.cpu_count()
     print("#factors: %d, lr: %f, reg: %f, batch_size: %d" % (factors, learning_rate, reg, batch_size))
