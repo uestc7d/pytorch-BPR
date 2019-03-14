@@ -34,8 +34,9 @@ class MFbpr(nn.Module):
         self.V = torch.normal(mean = self.init_mean * torch.ones(self.num_item, self.factors), std = self.init_stdev).requires_grad_()
 
         # optim
-        self.sgd_step = optim.SGD([self.U, self.V], lr=self.learning_rate)
-        self.mf_sheduler = optim.lr_scheduler.StepLR(gamma=0.3, optimizer=self.sgd_step, step_size=1000)
+        # self.sgd_step = optim.SGD([self.U, self.V], lr=self.learning_rate)
+        # self.mf_sheduler = optim.lr_scheduler.StepLR(gamma=0.1, optimizer=self.sgd_step, step_size=1000)
+        self.mf_optim = optim.Adam([self.U, self.V], lr=self.learning_rate)
 
         # Each element is the set of items for a user, used for negative sampling
         self.items_of_user = []
@@ -68,22 +69,22 @@ class MFbpr(nn.Module):
 
     def build_model(self, maxIter=100, num_thread=4, batch_size=32):
         # Training process
-        print("Training MF-BPR with: learning_rate=%.2f, regularization=%.4f, factors=%d, #epoch=%d, batch_size=%d."
+        print("Training MF-BPR with: learning_rate=%.4f, regularization=%.4f, factors=%d, #epoch=%d, batch_size=%d."
           %(self.learning_rate, self.reg, self.factors, maxIter, batch_size))
         for iteration in xrange(maxIter):
-            self.mf_sheduler.step()
+            # self.mf_sheduler.step()
             # Each training epoch
             t1 = time.time()
             for s in xrange(self.num_rating / batch_size):
                 # sample a batch of users, positive samples and negative samples
                 (users, items_pos, items_neg) = self.get_batch(batch_size)
                 # zero grad
-                self.sgd_step.zero_grad()
+                self.mf_optim.zero_grad()
                 # forward propagation
                 y_ui, y_uj, loss = self.forward(users, items_pos, items_neg)
                 # back propagation
                 loss.backward()
-                self.sgd_step.step()
+                self.mf_optim.step()
             # check performance
             if iteration % 20 == 19:
             	t2 = time.time()

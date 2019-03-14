@@ -13,7 +13,7 @@ if __name__ == '__main__':
     
     # MFbpr parameters
     factors = 64
-    learning_rate = 0.1
+    learning_rate = 0.0003
     reg = 0.01
     init_mean = 0
     init_stdev = 0.01
