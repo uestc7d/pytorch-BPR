@@ -30,10 +30,8 @@ class MFbpr(nn.Module):
         self.init_stdev = init_stdev
 
         # user & item latent vectors
-        # self.U = torch.normal(mean = self.init_mean * torch.ones(self.num_user, self.factors), std = self.init_stdev).requires_grad_()
-        # self.V = torch.normal(mean = self.init_mean * torch.ones(self.num_item, self.factors), std = self.init_stdev).requires_grad_()
-        self.U = nn.Embedding(self.num_user, self.factors).weight
-        self.V = nn.Embedding(self.num_item, self.factors).weight
+        self.U = torch.normal(mean = self.init_mean * torch.ones(self.num_user, self.factors), std = self.init_stdev).requires_grad_()
+        self.V = torch.normal(mean = self.init_mean * torch.ones(self.num_item, self.factors), std = self.init_stdev).requires_grad_()
 
         # optim
         self.mf_optim = optim.Adam([self.U, self.V], lr=self.learning_rate)
